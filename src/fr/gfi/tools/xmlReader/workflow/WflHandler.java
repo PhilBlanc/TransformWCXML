@@ -14,10 +14,15 @@ public class WflHandler extends DefaultHandler2 {
 	Workflow.Activity activity;
 	Workflow.Expression expression;
 	Workflow.Actor actor;
+	Workflow.Principal principal;
+	Workflow.Role role;
+	Workflow.Team team;
 	
 	//Enumeration of tags to read
 	enum tagNames {csvWfProcessTemplateBegin, csvWfVariable, csvname, csvtype, 
-		csvWfAssignedActivityTemplateBegin, csvWfAssignedActivityTemplateEnd, csvWfExpression, csvexpression, csvexprBody, csvWfActorAssignee, csvactor};
+		csvWfAssignedActivityTemplateBegin, csvWfAssignedActivityTemplateEnd, csvWfExpression, csvexpression, csvexprBody, csvsendNotification, csvinstructions,
+		csvWfPrincipalAssignee, csvprincipal,csvWfRoleAssignee, csvrole, csvWfActorAssignee, csvactor, csvWfTeamAssignee, csvteamAssignee,
+		csvWfInternalMethodTemplateBegin, csvWfInternalMethodTemplateEnd, csvWfExprRobotTemplateBegin, csvWfExprRobotTemplateEnd};
 	String courantTag = "";
 	//Enumeration of contextual elements
 	enum wflElements {workflow, activity, robot, synchRobot, internalMethod, connector, link}
@@ -52,12 +57,12 @@ public class WflHandler extends DefaultHandler2 {
 		}
 		
 		// Read variables
-		if (courantTag.endsWith(tagNames.csvWfVariable + "/" + tagNames.csvname)) {
+		if (!courantElement.equals(wflElements.internalMethod) && courantTag.endsWith(tagNames.csvWfVariable + "/" + tagNames.csvname)) {
 			if (var.name != null) throw new SAXException("Variable not initialized: " + new String(ch, start, length));
 			var.name = new String(ch, start, length);
 			System.out.print("\tvariable:\t" + var.name);
 		}
-		if (courantTag.endsWith(tagNames.csvWfVariable + "/" + tagNames.csvtype)) {
+		if (!courantElement.equals(wflElements.internalMethod) && courantTag.endsWith(tagNames.csvWfVariable + "/" + tagNames.csvtype)) {
 			var.type = new String(ch, start, length);
 			System.out.println(" : " + var.type);
 		}	
@@ -69,6 +74,20 @@ public class WflHandler extends DefaultHandler2 {
 			System.out.println("\nReading activity:\t" + activity.name);
 		}
 		
+		// Read Notification flag
+		if (courantTag.equals(tagNames.csvWfAssignedActivityTemplateBegin + "/" + tagNames.csvsendNotification)) {
+			activity.notification = new String(ch, start, length);
+			System.out.println("\nSend Notification:\t" + activity.notification);
+		}
+		
+		// Read Instruction
+		if (courantTag.endsWith(tagNames.csvWfAssignedActivityTemplateBegin + "/" + tagNames.csvinstructions)) {
+			activity.instruction = new String(ch, start, length);
+			activity.instruction = formatTextContent(activity.instruction);
+			System.out.println("\n\tActivity: " + activity.instruction);
+			System.out.println("---------------------------------------------");
+		}
+		
 		// Read Expression
 		if (courantTag.endsWith(tagNames.csvWfExpression + "/" + tagNames.csvexpression)) {
 			expression.name = new String(ch, start, length);
@@ -77,15 +96,27 @@ public class WflHandler extends DefaultHandler2 {
 		}
 		if (courantTag.endsWith(tagNames.csvWfExpression + "/" + tagNames.csvexprBody)) {
 			expression.body = new String(ch, start, length);
-			expression.body = formatExpression(expression.body);
+			expression.body = formatTextContent(expression.body);
 			System.out.println(expression.body);
 			System.out.println("---------------------------------------------");
 		}
 		
-		// Read Actor
+		// Read Participants
 		if ( courantTag.equals(tagNames.csvWfActorAssignee + "/" + tagNames.csvactor) ) {
 			actor.name = new String(ch, start, length);
-			System.out.println("\n\tactor: " + actor.name);			
+			System.out.println("\n\tActor: " + actor.name);			
+		}
+		if ( courantTag.equals(tagNames.csvWfPrincipalAssignee + "/" + tagNames.csvprincipal) ) {
+			principal.name = new String(ch, start, length);
+			System.out.println("\n\tPrincipal: " + principal.name);			
+		}
+		if ( courantTag.equals(tagNames.csvWfRoleAssignee + "/" + tagNames.csvrole) ) {
+			role.name = new String(ch, start, length);
+			System.out.println("\n\tRole: " + role.name);			
+		}
+		if ( courantTag.equals(tagNames.csvWfTeamAssignee + "/" + tagNames.csvteamAssignee) ) {
+			team.name = new String(ch, start, length);
+			System.out.println("\n\tTeam: " + team.name);			
 		}
 	}
 
@@ -130,10 +161,27 @@ public class WflHandler extends DefaultHandler2 {
 				}
 			}
 			
-			// Init Actor
+			// Init Participants
 			if ( courantElement.equals(wflElements.activity) && courantTag.endsWith(tagNames.csvWfActorAssignee.toString()) ) {
 				actor = wfl.new Actor();
 				activity.actorList.add(actor);
+			}
+			if ( courantElement.equals(wflElements.activity) && courantTag.endsWith(tagNames.csvWfPrincipalAssignee.toString()) ) {
+				principal = wfl.new Principal();
+				activity.principalList.add(principal);
+			}
+			if ( courantElement.equals(wflElements.activity) && courantTag.endsWith(tagNames.csvWfRoleAssignee.toString()) ) {
+				role = wfl.new Role();
+				activity.roleList.add(role);
+			}
+			if ( courantElement.equals(wflElements.activity) && courantTag.endsWith(tagNames.csvWfTeamAssignee.toString()) ) {
+				team = wfl.new Team();
+				activity.teamList.add(team);
+			}
+
+			// Internal Method
+			if (courantTag.equals(tagNames.csvWfInternalMethodTemplateBegin)) {
+				courantElement = wflElements.internalMethod;
 			}
 		}
 
@@ -156,6 +204,10 @@ public class WflHandler extends DefaultHandler2 {
 
 			if (courantTag.equals(tagNames.csvWfAssignedActivityTemplateEnd)) {
 				courantElement = wflElements.workflow;
+			}
+
+			if (courantTag.equals(tagNames.csvWfInternalMethodTemplateEnd)) {
+				courantElement = wflElements.activity;
 			}
 		}
 		
@@ -183,7 +235,7 @@ public class WflHandler extends DefaultHandler2 {
 	 * @param exp
 	 * @return
 	 */
-	private String formatExpression(String exp) {
+	private String formatTextContent(String exp) {
 		String result = "";
 		result = exp.replace("@", "\n");
 		return result;
@@ -194,6 +246,7 @@ public class WflHandler extends DefaultHandler2 {
 	 * @return workflow
 	 */
 	public Workflow getWorkflow() {
+		wfl.sort();
 		return wfl;
 	}
 }

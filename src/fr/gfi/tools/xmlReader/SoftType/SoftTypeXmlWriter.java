@@ -1,4 +1,4 @@
-package fr.gfi.tools.xmlReader.SoftType;
+package fr.gfi.tools.xmlReader.softType;
 
 import java.io.File;
 import java.util.List;
@@ -30,6 +30,7 @@ public class SoftTypeXmlWriter {
 	}
 	
 	public void buildDocument(List<SoftType> types) {
+		Element attributesElt;
 		Element attrElt;
 		Element constrElt;
 		Element layoutElt;
@@ -57,9 +58,11 @@ public class SoftTypeXmlWriter {
 			/*
 			 * Type attributes
 			 */
+			attributesElt = doc.createElement("typeAttributes");
+			typeElt.appendChild(attributesElt);
 			for (SoftType.Attribute attribute : type.attributeList) {
 				attrElt = doc.createElement("attribute");
-				typeElt.appendChild(attrElt);
+				attributesElt.appendChild(attrElt);
 				attrElt.setAttribute("name", attribute.name);
 				attrElt.setAttribute("displayName", attribute.displayName);
 				attrElt.setAttribute("type", attribute.type);

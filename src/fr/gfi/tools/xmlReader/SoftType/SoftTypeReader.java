@@ -1,4 +1,4 @@
-package fr.gfi.tools.xmlReader.SoftType;
+package fr.gfi.tools.xmlReader.softType;
 
 import java.io.File;
 import java.io.FileInputStream;

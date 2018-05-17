@@ -10,12 +10,12 @@ import fr.gfi.tools.utils.FileIOUtil;
 
 
 public class WorkflowReader {
-	private static String filePath = null;
-
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		String path = null;
+		
 		System.out.println("Worfkow reader start ...");
 
 		/*
@@ -24,18 +24,18 @@ public class WorkflowReader {
 		boolean areArgsOk = false;
 		for (int j = 0; j < args.length; ++j) {
 			if (args[j].equals("-file")) {
-				if (++j < args.length) filePath = new String(args[j]);
+				if (++j < args.length) path = new String(args[j]);
 			} 
 		}
 
-		if (filePath != null) {
+		if (path != null) {
 			areArgsOk = true;
 		}
 		
 		if (!areArgsOk) {
 			printUsage();
 		} else {
-			run();
+			run(path);
 		}
 
 	}
@@ -45,11 +45,23 @@ public class WorkflowReader {
 	 */
 	private static void printUsage() {
 		System.out.println("Usage: windchill fr.gfi.tools.xmlReader.WorkflowReader");
-		System.out.println("       -file path to XML file of workflow");
+		System.out.println("       -file path to XML file of workflow or path to directory of XML files");
 		System.out.println("       [-u user name] [-p user password]");
 	}
+
+	private static void run(String path) {
+		File file = new File(path);
+		if (file.isDirectory()) {
+			String[] wflFileList = file.list(new WflFilenameFilter());
+			for (int i = 0; i < wflFileList.length; i++) {
+				trasformFile(file.getAbsolutePath() + File.separator + wflFileList[i]);
+			}
+		} else {
+			trasformFile(path);
+		}
+	}
 	
-	private static void run() {
+	private static void trasformFile(String filePath) {
 
 		try {
 		    
@@ -64,8 +76,8 @@ public class WorkflowReader {
 	    	
 	    	//Encode text content of the file
 		    System.out.println("** Encode XML file");
-	    	String[] oldStrings = new String[] {"<csvexprBody>", "</csvexprBody>","<csvexpression>","</csvexpression>","&apos;","&lt;","&gt;","&amp;amp;","&amp;","&amp;quot;","&quot;"};
-	    	String[] newStrings = new String[] {"<csvexprBody><![CDATA[", "]]></csvexprBody>","<csvexpression><![CDATA[", "]]></csvexpression>","'","<",">","&","&","\"","\""};
+	    	String[] oldStrings = new String[] {"<csvinstructions>", "</csvinstructions>","<csvexprBody>", "</csvexprBody>","<csvexpression>","</csvexpression>","&apos;","&lt;","&gt;","&amp;amp;","&amp;","&amp;quot;","&quot;"};
+	    	String[] newStrings = new String[] {"<csvinstructions><![CDATA[", "]]></csvinstructions>","<csvexprBody><![CDATA[", "]]></csvexprBody>","<csvexpression><![CDATA[", "]]></csvexpression>","'","<",">","&","&","\"","\""};
 	    	File formatedXml = FileIOUtil.replaceInFile(xmlFile, formatedXmlPath, oldStrings, newStrings);
 	    	
 	    	//Parse XML with SAX
@@ -98,7 +110,6 @@ public class WorkflowReader {
 		}
 
 	}
-
 
 
 }

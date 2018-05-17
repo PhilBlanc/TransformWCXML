@@ -38,8 +38,13 @@ public class WflXmlWriter {
 		Element activitiesElt;
 		Element activityElt;
 		
-		Element actorsElt;
+		Element notifElt;
+		Element instructionElt;
+		Element participantsElt;
 		Element actorElt;
+		Element principalElt;
+		Element roleElt;
+		Element teamElt;
 		
 		// Workflow element
 		Element wflElt = doc.createElement("workflow");
@@ -75,6 +80,14 @@ public class WflXmlWriter {
 			activitiesElt.appendChild(activityElt);
 			activityElt.setAttribute("name", wflActivity.name);
 			
+			// Activity notification
+			activityElt.setAttribute("notification", wflActivity.notification);
+			
+			// Activity instruction
+			instructionElt = doc.createElement("instruction");
+			activityElt.appendChild(instructionElt);
+			instructionElt.appendChild(doc.createCDATASection(wflActivity.instruction));
+			
 			// Activity variables
 			variablesElt = doc.createElement("variables");
 			activityElt.appendChild(variablesElt);
@@ -97,13 +110,47 @@ public class WflXmlWriter {
 				exprElt.appendChild(doc.createCDATASection(activityExpr.body));
 			}
 			
-			// Activity actors
-			actorsElt = doc.createElement("actors");
-			activityElt.appendChild(actorsElt);
-			for(Workflow.Actor actor : wflActivity.actorList) {
-				actorElt = doc.createElement("actor");
-				actorsElt.appendChild(actorElt);
-				actorElt.setAttribute("name", actor.name);
+			// Activity participants
+			participantsElt = doc.createElement("participants");
+			
+			if (!wflActivity.actorList.isEmpty()) {
+				// Actors
+				activityElt.appendChild(participantsElt);
+				for(Workflow.Actor actor : wflActivity.actorList) {
+					actorElt = doc.createElement("actor");
+					participantsElt.appendChild(actorElt);
+					actorElt.setAttribute("name", actor.name);
+				}
+			}
+			
+			if (!wflActivity.principalList.isEmpty()) {
+				// Principals
+				activityElt.appendChild(participantsElt);
+				for(Workflow.Principal principal : wflActivity.principalList) {
+					principalElt = doc.createElement("principal");
+					participantsElt.appendChild(principalElt);
+					principalElt.setAttribute("name", principal.name);
+				}
+			}
+			
+			if (!wflActivity.roleList.isEmpty()) {
+				// Roles
+				activityElt.appendChild(participantsElt);
+				for(Workflow.Role role : wflActivity.roleList) {
+					roleElt = doc.createElement("role");
+					participantsElt.appendChild(roleElt);
+					roleElt.setAttribute("name", role.name);
+				}
+			}
+			
+			if (!wflActivity.teamList.isEmpty()) {
+				// Teams
+				activityElt.appendChild(participantsElt);
+				for(Workflow.Team team : wflActivity.teamList) {
+					teamElt = doc.createElement("team");
+					participantsElt.appendChild(teamElt);
+					teamElt.setAttribute("name", team.name);
+				}
 			}
 		}
 		

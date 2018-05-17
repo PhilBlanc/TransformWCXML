@@ -15,6 +15,9 @@ public class SoftType {
 	// Layout list
 	public List<Layout> layoutList = new ArrayList<Layout>();
 	
+	/**
+	 * Sort type components
+	 */
 	public void sort() {
 		attributeList.sort(new AttributeComparator());
 		
@@ -70,8 +73,8 @@ public class SoftType {
 	
 	private class ConstraintComparator implements Comparator<Constraint> {
 		@Override
-		public int compare(Constraint Constr0, Constraint Constr1) {
-			return Constr0.type.compareTo(Constr1.type);
+		public int compare(Constraint constr0, Constraint constr1) {
+			return constr0.type.compareTo(constr1.type);
 		}
 	}
 }
