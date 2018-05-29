@@ -2,6 +2,7 @@ package fr.gfi.tools.xmlReader.workflow;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -62,6 +63,7 @@ public class WorkflowReader {
 	}
 	
 	private static void trasformFile(String filePath) {
+		FileInputStream fis = null;
 
 		try {
 		    
@@ -87,7 +89,7 @@ public class WorkflowReader {
 		    SAXParser parser = factory.newSAXParser();
 		    
 		    WflHandler handler = new WflHandler();
-		    FileInputStream fis = new FileInputStream(formatedXml);
+		    fis = new FileInputStream(formatedXml);
 		    parser.parse(fis, handler);
 		    
 		    //Write XML Workflow file
@@ -103,10 +105,21 @@ public class WorkflowReader {
 	    	WflXmlWriter wflWriter = new WflXmlWriter();
 	    	wflWriter.buildDocument(handler.getWorkflow());
 	    	wflWriter.writeDocument(outputXmlPath);
-		    
+	    	
+	    	// Delete Temp file
+	    	formatedXml.delete();
+	    	
 		    System.out.println("... End Workflow reader.");
 		} catch (Exception e) {
 		    e.printStackTrace();
+		} finally {
+			if (fis != null) {
+				try {
+					fis.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 
 	}
