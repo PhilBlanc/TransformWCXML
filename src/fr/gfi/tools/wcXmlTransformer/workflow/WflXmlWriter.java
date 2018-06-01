@@ -1,4 +1,4 @@
-package fr.gfi.tools.xmlReader.workflow;
+package fr.gfi.tools.wcXmlTransformer.workflow;
 
 import java.io.File;
 import java.util.List;
@@ -16,7 +16,7 @@ import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import fr.gfi.tools.xmlReader.xmlObjects.Workflow;
+import fr.gfi.tools.wcXmlTransformer.xmlObjects.Workflow;
 
 public class WflXmlWriter {
 	Document doc;

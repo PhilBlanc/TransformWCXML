@@ -1,8 +1,7 @@
-package fr.gfi.tools.xmlReader.workflow;
+package fr.gfi.tools.wcXmlTransformer.softType;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -10,14 +9,14 @@ import javax.xml.parsers.SAXParserFactory;
 import fr.gfi.tools.utils.FileIOUtil;
 
 
-public class WorkflowReader {
+public class SoftTypeTransformer {
+	private static String filePath = null;
+
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		String path = null;
-		
-		System.out.println("Worfkow reader start ...");
+		System.out.println("SoftType reader start ...");
 
 		/*
 		 *  Read arguments
@@ -25,18 +24,18 @@ public class WorkflowReader {
 		boolean areArgsOk = false;
 		for (int j = 0; j < args.length; ++j) {
 			if (args[j].equals("-file")) {
-				if (++j < args.length) path = new String(args[j]);
+				if (++j < args.length) filePath = new String(args[j]);
 			} 
 		}
 
-		if (path != null) {
+		if (filePath != null) {
 			areArgsOk = true;
 		}
 		
 		if (!areArgsOk) {
 			printUsage();
 		} else {
-			run(path);
+			run();
 		}
 
 	}
@@ -45,31 +44,34 @@ public class WorkflowReader {
 	 * help instruction
 	 */
 	private static void printUsage() {
-		System.out.println("Usage: windchill fr.gfi.tools.xmlReader.WorkflowReader");
-		System.out.println("       -file path to XML file of workflow or path to directory of XML files");
+		System.out.println("Usage: windchill fr.gfi.tools.xmlReader.SoftTypeReader");
+		System.out.println("       -file path to XML file of SoftTypes or path list separated by ';'");
 		System.out.println("       [-u user name] [-p user password]");
 	}
-
-	private static void run(String path) {
-		File file = new File(path);
-		if (file.isDirectory()) {
-			String[] wflFileList = file.list(new WflFilenameFilter());
-			for (int i = 0; i < wflFileList.length; i++) {
-				trasformFile(file.getAbsolutePath() + File.separator + wflFileList[i]);
-			}
-		} else {
-			trasformFile(path);
-		}
-	}
 	
-	private static void trasformFile(String filePath) {
-		FileInputStream fis = null;
+	private static void run() {
 
+		if (filePath.contains(";")) {
+			// Process XML list
+			String[] paths = filePath.split(";");
+			for (int i = 0; i < paths.length; i++) {
+				processXml(paths[i]);
+			}
+			
+		} else {
+			processXml(filePath);
+		}
+				    
+	    System.out.println("... End SoftType reader.");
+
+
+	}
+
+	private static void processXml(String filePath) {
+	    System.out.println("\n* Read File: " + filePath);
 		try {
-		    
 		    File xmlFile = new File(filePath);
 	    	String formatedXmlPath = filePath;
-		    System.out.println("File: " + filePath);
 	    	if (filePath.contains(".")) {
 	    		formatedXmlPath = filePath.substring(0, filePath.lastIndexOf(".")) + "_tmp" + filePath.substring(filePath.lastIndexOf("."));
 	    	} else {
@@ -78,8 +80,8 @@ public class WorkflowReader {
 	    	
 	    	//Encode text content of the file
 		    System.out.println("** Encode XML file");
-	    	String[] oldStrings = new String[] {"<csvinstructions>", "</csvinstructions>","<csvexprBody>", "</csvexprBody>","<csvexpression>","</csvexpression>","&apos;","&lt;","&gt;","&amp;amp;","&amp;","&amp;quot;","&quot;"};
-	    	String[] newStrings = new String[] {"<csvinstructions><![CDATA[", "]]></csvinstructions>","<csvexprBody><![CDATA[", "]]></csvexprBody>","<csvexpression><![CDATA[", "]]></csvexpression>","'","<",">","&","&","\"","\""};
+	    	String[] oldStrings = new String[] {"<csvruleData>","</csvruleData>", "&apos;","&lt;","&gt;","&amp;amp;","&amp;","&amp;quot;","&quot;"};
+	    	String[] newStrings = new String[] {"<csvruleData><![CDATA[", "]]></csvruleData>", "'","<",">","&","&","\"","\""};
 	    	File formatedXml = FileIOUtil.replaceInFile(xmlFile, formatedXmlPath, oldStrings, newStrings);
 	    	
 	    	//Parse XML with SAX
@@ -88,11 +90,11 @@ public class WorkflowReader {
 		    factory.setSchema(null);
 		    SAXParser parser = factory.newSAXParser();
 		    
-		    WflHandler handler = new WflHandler();
-		    fis = new FileInputStream(formatedXml);
+		    SoftTypeHandler handler = new SoftTypeHandler();
+		    FileInputStream fis = new FileInputStream(formatedXml);
 		    parser.parse(fis, handler);
 		    
-		    //Write XML Workflow file
+		    //Write XML SoftType file
 		    System.out.println("** Write output XML file");
 	    	String outputXmlPath = filePath;
 	    	if (filePath.contains(".")) {
@@ -102,27 +104,12 @@ public class WorkflowReader {
 	    	}
 	    	System.out.println("File: " + outputXmlPath);
 	    	
-	    	WflXmlWriter wflWriter = new WflXmlWriter();
-	    	wflWriter.buildDocument(handler.getWorkflow());
-	    	wflWriter.writeDocument(outputXmlPath);
-	    	
-	    	// Delete Temp file
-	    	formatedXml.delete();
-	    	
-		    System.out.println("... End Workflow reader.");
+	    	SoftTypeXmlWriter typeWriter = new SoftTypeXmlWriter();
+	    	typeWriter.buildDocument(handler.getTypes());
+	    	typeWriter.writeDocument(outputXmlPath);
 		} catch (Exception e) {
 		    e.printStackTrace();
-		} finally {
-			if (fis != null) {
-				try {
-					fis.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
 		}
-
 	}
-
 
 }

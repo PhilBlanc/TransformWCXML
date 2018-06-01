@@ -1,10 +1,10 @@
-package fr.gfi.tools.xmlReader.workflow;
+package fr.gfi.tools.wcXmlTransformer.workflow;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.ext.DefaultHandler2;
 
-import fr.gfi.tools.xmlReader.xmlObjects.Workflow;
+import fr.gfi.tools.wcXmlTransformer.xmlObjects.Workflow;
 
 public class WflHandler extends DefaultHandler2 {
 	private static String TAG_SEPARATOR = "/";

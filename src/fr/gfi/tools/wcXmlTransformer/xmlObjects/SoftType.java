@@ -1,4 +1,4 @@
-package fr.gfi.tools.xmlReader.xmlObjects;
+package fr.gfi.tools.wcXmlTransformer.xmlObjects;
 
 import java.util.ArrayList;
 import java.util.Comparator;

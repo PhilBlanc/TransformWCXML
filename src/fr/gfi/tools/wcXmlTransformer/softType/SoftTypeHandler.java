@@ -1,4 +1,4 @@
-package fr.gfi.tools.xmlReader.softType;
+package fr.gfi.tools.wcXmlTransformer.softType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,7 +7,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.ext.DefaultHandler2;
 
-import fr.gfi.tools.xmlReader.xmlObjects.SoftType;
+import fr.gfi.tools.wcXmlTransformer.xmlObjects.SoftType;
 
 public class SoftTypeHandler extends DefaultHandler2 {
 	private static String TAG_SEPARATOR = "/";

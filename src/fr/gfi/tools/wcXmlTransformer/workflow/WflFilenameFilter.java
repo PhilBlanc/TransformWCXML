@@ -1,4 +1,4 @@
-package fr.gfi.tools.xmlReader.workflow;
+package fr.gfi.tools.wcXmlTransformer.workflow;
 
 import java.io.File;
 import java.io.FilenameFilter;

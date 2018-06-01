@@ -1,4 +1,4 @@
-package fr.gfi.tools.xmlReader.softType;
+package fr.gfi.tools.wcXmlTransformer.softType;
 
 import java.io.File;
 import java.util.List;
@@ -16,7 +16,7 @@ import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import fr.gfi.tools.xmlReader.xmlObjects.SoftType;
+import fr.gfi.tools.wcXmlTransformer.xmlObjects.SoftType;
 
 public class SoftTypeXmlWriter {
 	Document doc;
